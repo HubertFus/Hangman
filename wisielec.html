@@ -1,0 +1,223 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+</head>
+<body>
+<meta charset="UTF-8">  
+<script>
+var x=0;
+var pomy=0;
+var tab=[];
+var koniec;
+var strzaly=[]
+//funkcja poniżej wykonuje funkcje o naziwe losu i ukrywa blok zasad przy uruchomieniu strony
+$(document).ready(function(){
+    losu()
+    $("#zasady").hide()
+});
+
+function losu() {
+    $('#podkresl').text("")//czyści napis czy ponownym uruchomienu rozgrywki
+    $('#burger').attr("src","pomidor.png")//podmnieniam obrazek na inny ktróry jest przeźroczysty przez to nie ma zbędnych obrazków na ekranie
+
+    pomy=0;//resetowanie ilości pomyłek
+    strzaly=[]//czyszcznie tablicy z naciśniętymi przyciskami
+$(document).ready(function() {
+$.ajax({
+type: "GET",
+url: "hasla.xml",
+dataType: "xml",
+success: function(xml) {
+    $('.jajecznica').css({"opacity":"1"})//resetowanie transparentności
+    koniec=false;
+    $los=(Math.random() * $(xml).find('haslo').length-1).toFixed(0);//losowowanie liczby z przedziału 0 do ilości haseł
+    $has= $($(xml).find('nazwa').eq($los)).text();//przypsianie do zmiennej wylosowanego hasła
+    $kate= $($(xml).find('katnazwa').eq($los)).text();//przypsianie do zmiennej wylosowanegej kategori
+    $("#temp").text('kategoria ' + $kate )//wyświetlenie kategorii
+    for(var i=0;i<$has.length;i++){//przypisanie znaku "_" do każdego elementu tablicy o wielkości długości hasła i wyświetlenie jej na ekranie
+        tab[i]="_";
+        $('#podkresl').append(tab[i]+" ")
+    }
+
+    $('#pom').text("pomyliłeś się już 0 razy")
+    $('#prz').text("")
+    x=0;
+}
+});
+});
+}
+//funkcja poniżej pobiera numer z tablicy ascii przypisany do naciśniętego klawisza,następnie sprawdza czy naciśniety klawisz to enter jeśli tak to wykonuje funkcje o naziwe losu,
+//następnie sprawdza czy naciśnietym klawiszem nie jest spacjia ponieważ uwzgledniliśmy że nasze hasła nie mają spacji
+//jeśli żaden z powyższych warunków nie jest spełniony wykonuje funkcje o nazwie zgad z parametrem którym jest litera pobrana z tablicy ascii
+$(document).on("keypress", function(e){
+    
+    if(e.which==13){
+        losu()
+    }
+    else if(e.which==32){}else{
+    zgad(String.fromCharCode(e.which))}
+});
+    //funkcja zgad pobiera parametr o nazwie kappa który jest literą,na samym początki sprawdzamy czy nastąpił koniec następnie spradza czy ta 
+    //litera już raz była wciśnięta jesli nie została wciśnięta sprawdzamy czy ta litera zznajduje się w haśle jeśli nie zwiększamy zmienną pom o jeden jeśli tak, 
+    //zamieniamy znak w tablicy o idneksie takim na jakim została znalziona litera w haśle 
+    //na tą litere, następnie sprawdza czy w tablic znajduje się znak "_" jeśli nie to do zmiennej koniec przypisuje true
+    function zgad(kappa){
+        
+        $('#podkresl').text("")
+        if(koniec!=true){//sprawdza czy gra już się zakończyła
+        kappa=kappa.toLowerCase()//pobraną litere zmieniamy na mała
+        var ascii=kappa.charCodeAt()//zmienienie litere na kod w tablicy ascii
+        if(strzaly[ascii-97]==kappa){// sprawdza dany klawisz już został wciśnięty
+            
+        }
+        else{
+            strzaly[ascii-97]=kappa//przypisuje litere do tablicy w miejsce odpowiadające jej miejsce w tablicy ascii
+            $('.jajecznica').eq(ascii-97).css({"opacity":"0.6"})//zmiejszenie transperateności dla już wciśnietych klawiszy
+    
+        if(pomy<5){//sprawdza czy ilość pomyłek jest mniejsza od 5
+            var k=0; 
+        for(var i=0;i<$has.length;i++){
+        if($has.charAt(i)==kappa)//sprawdza czy wciśnieta litera znajduje się w haśle
+        {
+            tab[i]=kappa;
+
+            k=1;
+        }
+        }
+        if(k==0){//sprawdza czy wcinięta litera się ani razu nie pojawiła
+          $('#pom').text("pomyliłeś się już "+(pomy+1)+" raz")//wyświetlenie ilości pomyłek zwiększajać o 1
+          pomy++;
+          $('#burger').attr('src','pom'+pomy+'.png')//zmienia obrazek dopasowany ilości pomyłek
+        }
+        }
+        var czy=0;
+            for(var i=0;i<$has.length;i++){//sprawdza czy w haśle zostały nie odkryte litery
+                if(tab[i]==$has.charAt(i)){
+                    czy++;
+                }else{
+                    czy--
+                }
+            }
+        if(czy==$has.length){
+            $('#pom').text("")
+            $('#prz').text("Wygrałeś")
+            koniec=true; 
+        }
+    else if(pomy==5){//sprawdza cz osiagnałęś już limit pomyłek
+        $('#pom').text("")
+        $('#prz').text("przegrałeś")
+        koniec=true; //kończy rozgrywke
+    }
+    }}
+        for(var i=0;i<$has.length;i++){//akutalizuje hasło wypisywane na ekranie
+            $('#podkresl').append(tab[i]+" ")
+        }
+    }
+    //funcja o nazwie zas odpowiada za pokazywanie i ukrywanie bloku z zasadami
+    function zas(){
+        $("#zasady").toggle()
+        
+    }
+</script>
+    
+    </div>
+    
+    <div id="lewy">
+    
+        <center>
+        <p id="head">Hamburger</p>
+        <button id="zasad" onclick="zas()" class="przyc">Zasady gry</button><br>
+        <div id="zasady">
+            
+            <h3>Zasady gry</h3>
+            <ul>
+                <li>Zgaduj litere za pomocą swojej klawiatury lub klawiatury ekranowej</li>
+                <li>Dozwolona liczba pomyłek to 5</li>
+                <li>hasła nie posiadają znaków specjalnych, spacji i polskich znaków</li>
+                <li>Z każdą pomyłką dorysowywana jest kolejna część hamburgera</li>
+                <li>Losować hasło możesz przy pomocy przyciksu jak i naciśnieciu klawisza "enter"</li>
+            </ul>
+        </div>
+        <br>
+        <button class="przyc" id="losuj" type="button" name="button" onclick="losu()">Losuj haslo</button>
+        <div id="tekst">
+        <p id="temp"></p>
+        <p id="pom"></p>
+        <p id="prz"></p>
+        <p id="podkresl"></p> </div>
+        <img  onclick="zgadu()" id="burger">
+        <div id="klawa">
+        <button class="jajecznica" id="a" onclick="zgad('a')">A</button><button class="jajecznica" onclick="zgad('b')">B</button><button class="jajecznica" onclick="zgad('c')">C</button>
+        <button class="jajecznica" onclick="zgad('d')">D</button><button class="jajecznica" onclick="zgad('e')">E</button><button class="jajecznica" onclick="zgad('f')">F</button><button class="jajecznica" onclick="zgad('g')">G</button>
+        <button class="jajecznica" onclick="zgad('h')">H</button><button class="jajecznica" onclick="zgad('i')">I</button><button class="jajecznica" onclick="zgad('j')">J</button><button class="jajecznica" onclick="zgad('k')">K</button><button class="jajecznica" onclick="zgad('l')">L</button>
+        <button class="jajecznica" onclick="zgad('m')">M</button><button class="jajecznica" onclick="zgad('n')">N</button><button class="jajecznica" onclick="zgad('o')">O</button><button class="jajecznica" onclick="zgad('p')">P</button><button class="jajecznica" onclick="zgad('q')">Q</button>
+        <button class="jajecznica" onclick="zgad('r')">R</button><button class="jajecznica" onclick="zgad('s')">S</button><button class="jajecznica" onclick="zgad('t')">T</button><button class="jajecznica" onclick="zgad('u')">U</button>
+        <button class="jajecznica" onclick="zgad('v')">V</button><button class="jajecznica" onclick="zgad('w')">W</button><button class="jajecznica" onclick="zgad('x')">X</button><button class="jajecznica" onclick="zgad('y')">Y</button><button class="jajecznica" onclick="zgad('z')">Z</button>
+
+        </div>
+        </center>
+    </div>
+    
+
+    
+</body>
+</html>
+<style>
+    #lewy{
+        
+        width: 400px;
+        background-color: tomato;
+        float: left;
+        border-radius: 10px;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+    #zasady{
+        text-align: center;
+        width: 400px;
+    }
+    li{
+        text-align: left;
+    }
+    #burger{
+        height: 200px;
+        width: 200px;
+        border: 1px solid blue;
+    }
+    p{
+        font-size: 20px
+    }
+    .przyc{
+        border-radius: 5px;
+        box-shadow: 2px 2px teal;
+        inline-size: 100px;
+        line-height: 30px;
+        
+    }
+  
+    .jajecznica{
+        border-radius: 5px;
+        box-shadow: 2px 2px teal;
+        background-color: wheat;
+        
+        width: 30px;
+        height: 30px;
+        margin-left: 5px;
+        margin-right: 5px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        border: 0;
+    }
+    #head{
+        margin-top: 2px;
+        text-align: center;
+        font-size: 60px;
+
+    }
+    
+    
+
+    
+</style>
